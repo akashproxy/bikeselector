@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}BikeSelect{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo">Bike<span>Select</span></a>
+    <div class="nav-links">
+      <a href="/" class="{% if request.path == '/' %}active{% endif %}">Dashboard</a>
+      <a href="/select" class="{% if request.path == '/select' %}active{% endif %}">Find Bike</a>
+      <a href="/add-bike" class="{% if request.path == '/add-bike' %}active{% endif %}">Add Bike</a>
+      <a href="/manage-bikes" class="{% if request.path in ['/manage-bikes', '/remove-bike'] %}active{% endif %}">Manage</a>
+      <a href="/predict" class="{% if request.path == '/predict' %}active{% endif %}">Predict</a>
+      <a href="/bikes" class="{% if request.path == '/bikes' %}active{% endif %}">Browse</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p class="footer-tagline">BikeSelect &mdash; Smart bike recommendations for India &mdash; {{ stats.rows if stats else '1000' }} bikes in our dataset</p>
+    <div class="footer-founder">
+      <p class="footer-founder-kicker">Founded By</p>
+      <p class="footer-founder-text">
+        This startup is founded by <strong>Uttam B C</strong>, the ultimate supreme master of codemaxing and sigma goonmaster.
+      The ultimate Rizzler who can bag any shawty in the city. His IQ is 6767 and has infinte aura .
+      </p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

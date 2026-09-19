@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block title %}Manage Bikes{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <span class="hero-kicker">Manage Dataset</span>
+  <h1>Edit &amp; Remove Bikes</h1>
+  <p>Search the dataset, edit bike details, or remove entries from the CSV.</p>
+</section>
+
+<div class="filters panel">
+  <div class="filter-row">
+    <input type="search" id="search" placeholder="Search brand or model..." class="search-input">
+    <select id="filter-brand">
+      <option value="">All brands</option>
+    </select>
+    <select id="filter-segment">
+      <option value="">All segments</option>
+      <option value="budget">Budget</option>
+      <option value="mid">Mid</option>
+      <option value="premium">Premium</option>
+    </select>
+    <button type="button" id="apply-filters" class="btn btn-primary">Search</button>
+  </div>
+</div>
+
+<div class="panel manage-toolbar">
+  <label class="checkbox-label">
+    <input type="checkbox" id="select-all"> Select all on this page
+  </label>
+  <button type="button" id="remove-selected" class="btn btn-danger" disabled>
+    Remove Selected (<span id="selected-count">0</span>)
+  </button>
+</div>
+
+<div class="table-wrap panel">
+  <table class="data-table" id="bikes-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>Year</th>
+        <th>CC</th>
+        <th>Segment</th>
+        <th>Price</th>
+        <th>Sensitivity</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="bikes-body"></tbody>
+  </table>
+  <p class="table-meta" id="table-meta">Loading bikes...</p>
+</div>
+
+<!-- Edit modal -->
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-content panel">
+    <div class="modal-header">
+      <h2>Edit Bike</h2>
+      <button type="button" class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <form id="edit-form">
+      <input type="hidden" id="edit-row-id" name="row_id">
+
+      <div class="form-section">
+        <h3>Basic Details</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-brand">Brand</label>
+            <input type="text" id="edit-brand" name="brand" list="brand-list" required>
+            <datalist id="brand-list">
+              {% for b in options.brands %}
+              <option value="{{ b }}">
+              {% endfor %}
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label for="edit-model">Model</label>
+            <input type="text" id="edit-model" name="model" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-segment">Segment</label>
+            <select id="edit-segment" name="segment" required>
+              {% for s in options.segments %}
+              <option value="{{ s }}">{{ s | capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-year">Year</label>
+            <input type="number" id="edit-year" name="year" min="2015" max="2026" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Performance &amp; Specs</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-cc">Engine CC</label>
+            <input type="number" id="edit-cc" name="cc" min="50" max="2000" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-top_speed_kmh">Top Speed (km/h)</label>
+            <input type="number" id="edit-top_speed_kmh" name="top_speed_kmh" min="60" max="350" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-mileage_kmpl">Mileage (km/l)</label>
+            <input type="number" id="edit-mileage_kmpl" name="mileage_kmpl" min="10" max="100" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-fuel_tank_liters">Fuel Tank (L)</label>
+            <input type="number" id="edit-fuel_tank_liters" name="fuel_tank_liters" min="5" max="25" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-speedometer_type">Speedometer</label>
+            <select id="edit-speedometer_type" name="speedometer_type" required>
+              {% for t in options.speedometer_types %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-overall_score">Overall Score</label>
+            <input type="number" id="edit-overall_score" name="overall_score" min="0" max="100" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Pricing</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-factory_price_inr">Factory Price (₹)</label>
+            <input type="number" id="edit-factory_price_inr" name="factory_price_inr" min="30000" step="1000" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-gst_rate_pct">GST Rate (%)</label>
+            <select id="edit-gst_rate_pct" name="gst_rate_pct" required>
+              {% for g in options.gst_rates %}
+              <option value="{{ g }}">{{ g }}%</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-gst_amount_inr">GST Amount (₹)</label>
+            <input type="number" id="edit-gst_amount_inr" name="gst_amount_inr" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label for="edit-ex_showroom_inr">Ex-Showroom (₹)</label>
+            <input type="number" id="edit-ex_showroom_inr" name="ex_showroom_inr" min="0" step="1000">
+          </div>
+          <div class="form-group">
+            <label for="edit-on_road_price_inr">On-Road Price (₹)</label>
+            <input type="number" id="edit-on_road_price_inr" name="on_road_price_inr" min="40000" step="1000" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-price_increase_scenario_pct">Price Increase (%)</label>
+            <input type="number" id="edit-price_increase_scenario_pct" name="price_increase_scenario_pct" min="0" max="30" step="0.1" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Buyer Profile</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-buyer_behaviour">Buyer Behaviour</label>
+            <select id="edit-buyer_behaviour" name="buyer_behaviour" required>
+              {% for b in options.buyer_behaviours %}
+              <option value="{{ b }}">{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-price_sensitivity">Price Sensitivity</label>
+            <select id="edit-price_sensitivity" name="price_sensitivity">
+              <option value="">Auto-predict with ML</option>
+              {% for s in sens_order %}
+              <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-edit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<div id="error-panel" class="panel error-panel hidden">
+  <p id="error-message"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const SENS_COLORS = {{ sens_colors | tojson }};
+  const selected = new Set();
+  let currentBikes = [];
+
+  function fmt(n) { return Number(n).toLocaleString('en-IN'); }
+
+  function showToast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = isError ? 'toast toast-error' : 'toast toast-success';
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+  }
+
+  function updateSelectionUI() {
+    document.getElementById('selected-count').textContent = selected.size;
+    document.getElementById('remove-selected').disabled = selected.size === 0;
+    const allChecked = currentBikes.length > 0 && currentBikes.every(b => selected.has(b.row_id));
+    document.getElementById('select-all').checked = allChecked;
+  }
+
+  function openModal() {
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  async function loadBikes() {
+    const params = new URLSearchParams({
+      q: document.getElementById('search').value,
+      brand: document.getElementById('filter-brand').value,
+      segment: document.getElementById('filter-segment').value,
+      limit: 100,
+    });
+    const res = await fetch('/api/bikes?' + params);
+    const data = await res.json();
+    currentBikes = data.bikes;
+    const tbody = document.getElementById('bikes-body');
+
+    if (!data.bikes.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">No bikes found.</td></tr>';
+    } else {
+      tbody.innerHTML = data.bikes.map(b => `
+        <tr>
+          <td><input type="checkbox" class="row-check" data-id="${b.row_id}" ${selected.has(b.row_id) ? 'checked' : ''}></td>
+          <td>${b.brand}</td>
+          <td><strong>${b.model}</strong></td>
+          <td>${b.year}</td>
+          <td>${b.cc}</td>
+          <td><span class="tag tag-${b.segment}">${b.segment}</span></td>
+          <td>₹${fmt(b.on_road_price_inr)}</td>
+          <td><span class="sens-tag" style="background:${SENS_COLORS[b.price_sensitivity] || '#999'}">${b.price_sensitivity}</span></td>
+          <td class="action-cell">
+            <button type="button" class="btn btn-secondary btn-sm edit-one" data-id="${b.row_id}">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm remove-one" data-id="${b.row_id}" data-name="${b.brand} ${b.model}">Remove</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    document.getElementById('table-meta').textContent =
+      `Showing ${data.bikes.length} of ${data.total} bikes · ${selected.size} selected`;
+    updateSelectionUI();
+  }
+
+  async function openEdit(rowId) {
+    try {
+      const res = await fetch(`/api/bikes/${rowId}`);
+      const bike = await res.json();
+      if (!res.ok) throw new Error(bike.error || 'Could not load bike');
+
+      document.getElementById('edit-row-id').value = rowId;
+      const fields = [
+        'brand','model','segment','year','cc','top_speed_kmh','mileage_kmpl',
+        'fuel_tank_liters','speedometer_type','overall_score','factory_price_inr',
+        'gst_rate_pct','gst_amount_inr','ex_showroom_inr','on_road_price_inr',
+        'price_increase_scenario_pct','buyer_behaviour','price_sensitivity'
+      ];
+      fields.forEach(f => {
+        const el = document.getElementById('edit-' + f);
+        if (el) el.value = bike[f] ?? '';
+      });
+      openModal();
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  async function removeBikes(rowIds, confirmMsg) {
+    if (!confirm(confirmMsg)) return;
+    try {
+      const res = await fetch('/api/bikes/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ row_ids: rowIds }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Remove failed');
+      rowIds.forEach(id => selected.delete(id));
+      showToast(json.message);
+      await loadBikes();
+    } catch (err) {
+      document.getElementById('error-panel').classList.remove('hidden');
+      document.getElementById('error-message').textContent = err.message;
+    }
+  }
+
+  document.getElementById('edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rowId = document.getElementById('edit-row-id').value;
+    const raw = Object.fromEntries(new FormData(e.target));
+    const data = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (k !== 'row_id' && v !== '') data[k] = v;
+    }
+
+    const btn = document.getElementById('save-edit');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch(`/api/bikes/${rowId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Update failed');
+      closeModal();
+      showToast(json.message);
+      await loadBikes();
+    } catch (err) {
+      showToast(err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  });
+
+  document.getElementById('bikes-body').addEventListener('change', e => {
+    if (e.target.classList.contains('row-check')) {
+      const id = parseInt(e.target.dataset.id, 10);
+      if (e.target.checked) selected.add(id); else selected.delete(id);
+      updateSelectionUI();
+    }
+  });
+
+  document.getElementById('bikes-body').addEventListener('click', e => {
+    if (e.target.classList.contains('edit-one')) {
+      openEdit(parseInt(e.target.dataset.id, 10));
+    }
+    if (e.target.classList.contains('remove-one')) {
+      const id = parseInt(e.target.dataset.id, 10);
+      removeBikes([id], `Remove ${e.target.dataset.name} from the dataset?`);
+    }
+  });
+
+  document.getElementById('select-all').addEventListener('change', e => {
+    if (e.target.checked) currentBikes.forEach(b => selected.add(b.row_id));
+    else currentBikes.forEach(b => selected.delete(b.row_id));
+    loadBikes();
+  });
+
+  document.getElementById('remove-selected').addEventListener('click', () => {
+    const ids = [...selected];
+    removeBikes(ids, `Remove ${ids.length} selected bike(s)?`);
+  });
+
+  document.getElementById('apply-filters').addEventListener('click', loadBikes);
+  document.getElementById('search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadBikes();
+  });
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('cancel-edit').addEventListener('click', closeModal);
+  document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+
+  const brands = {{ brands | tojson }};
+  brands.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b;
+    opt.textContent = b;
+    document.getElementById('filter-brand').appendChild(opt);
+  });
+
+  loadBikes();
+</script>
+{% endblock %}

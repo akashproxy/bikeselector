@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <span class="hero-kicker">Welcome</span>
+  <h1>Find the right bike for you</h1>
+  <p class="subtitle">Search by budget and specs, predict price sensitivity, and explore 1,000+ Indian motorcycles — all in one place.</p>
+  <div class="hero-actions">
+    <a href="/select" class="btn btn-primary">Find Your Bike</a>
+    <a href="/add-bike" class="btn btn-secondary">Add Bike</a>
+    <a href="/predict" class="btn btn-secondary">Predict Sensitivity</a>
+    <a href="/bikes" class="btn btn-secondary">Browse Dataset</a>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.rows | default(0) }}</span>
+    <span class="stat-label">Bikes</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.brands }}</span>
+    <span class="stat-label">Brands</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.models }}</span>
+    <span class="stat-label">Models</span>
+  </div>
+  <div class="stat-card highlight">
+    <span class="stat-value">{{ best_accuracy }}%</span>
+    <span class="stat-label">Best Accuracy ({{ best_model }})</span>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Price Sensitivity Distribution</h2>
+  <div class="sens-bars">
+    {% for level in sens_order %}
+    {% set count = stats.sensitivity_counts.get(level, 0) %}
+    {% set pct = (count / stats.rows * 100) | round(1) if stats.rows else 0 %}
+    <div class="sens-row">
+      <span class="sens-label" style="color: {{ sens_colors[level] }}">{{ level }}</span>
+      <div class="sens-track">
+        <div class="sens-fill" style="width: {{ pct }}%; background: {{ sens_colors[level] }}"></div>
+      </div>
+      <span class="sens-count">{{ count }} ({{ pct }}%)</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Dataset Overview</h2>
+  <dl class="overview-list">
+    <div><dt>Price range</dt><dd>₹{{ "{:,}".format(stats.price_min) }} – ₹{{ "{:,}".format(stats.price_max) }}</dd></div>
+    <div><dt>CC range</dt><dd>{{ stats.cc_min }} – {{ stats.cc_max }} cc</dd></div>
+    <div><dt>Year range</dt><dd>{{ stats.year_min }} – {{ stats.year_max }}</dd></div>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2>Model Leaderboard</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Accuracy</th>
+          <th>F1 Macro</th>
+          <th>ROC-AUC</th>
+          <th>CV Mean</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in leaderboard %}
+        <tr class="{% if loop.first %}best-row{% endif %}">
+          <td>{{ row.Model }}{% if loop.first %} ★{% endif %}</td>
+          <td>{{ "%.1f"|format(row.Accuracy * 100) }}%</td>
+          <td>{{ "%.3f"|format(row['F1 Macro']) }}</td>
+          <td>{{ "%.3f"|format(row['ROC-AUC']) if row['ROC-AUC'] == row['ROC-AUC'] else '—' }}</td>
+          <td>{{ "%.3f"|format(row['CV Mean']) }} ± {{ "%.3f"|format(row['CV Std']) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

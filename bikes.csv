@@ -1,0 +1,41 @@
+name,brand,cc,mileage_kmpl,price_inr,curb_weight_kg,power_hp,torque_nm,type,abs,fuel_tank_l,likeliness_score
+Royal Enfield Classic 350,Royal Enfield,349,41,196000,195,20.2,28,Cruiser,1,13,8.2
+Royal Enfield Meteor 350,Royal Enfield,349,36,211000,191,20.2,27,Cruiser,1,15,8.5
+Royal Enfield Thunderbird 350X,Royal Enfield,346,37,175000,192,19.8,28,Cruiser,1,13,7.9
+Honda CB Shine,Honda,124,60,78000,112,10.6,11,Commuter,0,10.5,7.6
+Honda Hornet 2.0,Honda,184,45,133000,142,17,16.1,Street,1,12,8
+Honda CB300R,Honda,286,35,265000,147,30.9,27.5,Naked,1,12,8.7
+Honda CBR650R,Honda,649,20,895000,207,95,64,Sport,1,15.4,9.1
+Bajaj Pulsar NS200,Bajaj,199,35,140000,156,24.5,18.5,Naked,1,12,8.3
+Bajaj Pulsar 150,Bajaj,149,50,105000,138,14,13.4,Street,0,15,7.5
+Bajaj Dominar 400,Bajaj,373,26,213000,182,40,35,Adventure,1,13,8.6
+Bajaj Avenger Street 160,Bajaj,160,52,107000,148,15,13.7,Cruiser,0,13,7.3
+Bajaj Pulsar RS200,Bajaj,199,25,159000,165,24.5,18.7,Sport,1,13,8.4
+KTM Duke 200,KTM,199,30,188000,148,25,19.2,Naked,1,13.4,8.8
+KTM Duke 390,KTM,373,30,314000,163,43.5,37,Naked,1,13.4,9
+KTM RC 390,KTM,373,25,329000,163,43.5,37,Sport,1,13.7,9.2
+KTM Adventure 390,KTM,373,30,340000,177,43.5,37,Adventure,1,14.5,9.3
+Yamaha FZ-S V3,Yamaha,149,45,113000,135,12.4,12.8,Street,1,12,7.8
+Yamaha MT-15,Yamaha,155,45,159000,138,18.3,14.1,Naked,1,10,8.5
+Yamaha R15 V4,Yamaha,155,40,177000,142,18.4,14.2,Sport,1,11,9
+Yamaha FZ25,Yamaha,249,40,156000,153,20.8,20.1,Street,1,14,8.2
+Yamaha MT-07,Yamaha,689,18,755000,193,73.4,68,Naked,1,13,8.9
+Suzuki Gixxer 250,Suzuki,249,35,176000,157,26.5,22.6,Street,1,12,8.3
+Suzuki V-Strom 650,Suzuki,645,25,840000,213,70,62,Adventure,1,20,8.7
+Suzuki Hayabusa,Suzuki,1340,15,1620000,264,187,150,Sport,1,20,9.5
+TVS Apache RTR 200 4V,TVS,197,40,137000,148,20.8,18.1,Naked,1,12,8.1
+TVS Apache RR 310,TVS,312,30,272000,174,34,27.3,Sport,1,11,8.9
+TVS Ronin,TVS,225,40,153000,157,20.4,19.93,Scrambler,1,14,8
+Hero Splendor Plus,Hero,97,70,73000,112,8.36,8.05,Commuter,0,9.8,7
+Hero Glamour,Hero,125,58,82000,117,10.7,10.6,Commuter,0,10.5,7.2
+Hero XPulse 200,Hero,199,35,138000,157,18.4,17.1,Adventure,1,13,7.9
+Jawa 42,Jawa,293,32,195000,175,27,28,Cruiser,1,14,7.8
+Kawasaki Ninja 300,Kawasaki,296,25,329000,172,38.4,27,Sport,1,17,8.8
+Kawasaki Z650,Kawasaki,649,18,590000,187,68,65.7,Naked,1,15,9
+Kawasaki Versys 650,Kawasaki,649,20,715000,216,66,65.7,Adventure,1,21,8.9
+BMW G 310 R,BMW,313,30,265000,158,34,28,Naked,1,11,8.7
+BMW G 310 GS,BMW,313,30,360000,170,34,28,Adventure,1,11,8.8
+Royal Enfield Himalayan,Royal Enfield,411,30,215000,199,24.3,32,Adventure,1,15,8.4
+Royal Enfield Interceptor 650,Royal Enfield,648,22,303000,213,47,52,Cruiser,1,13.7,9
+Triumph Street Triple R,Triumph,765,18,1020000,166,118,79,Naked,1,17.4,9.3
+Honda Africa Twin,Honda,1084,18,1560000,238,102,105,Adventure,1,18.8,9.4

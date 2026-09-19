@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% block title %}Add Bike{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <span class="hero-kicker">Expand Dataset</span>
+  <h1>Add a New Bike</h1>
+  <p>Enter full bike details, save to the CSV dataset, and instantly compare against existing bikes with ML predictions.</p>
+</section>
+
+<div class="add-bike-layout">
+  <form id="add-bike-form" class="panel">
+    <h2>Bike Information</h2>
+
+    <div class="form-section">
+      <h3>Basic Details</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="brand">Brand</label>
+          <input type="text" id="brand" name="brand" list="brand-list" required placeholder="e.g. Honda">
+          <datalist id="brand-list">
+            {% for b in options.brands %}
+            <option value="{{ b }}">
+            {% endfor %}
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label for="model">Model</label>
+          <input type="text" id="model" name="model" required placeholder="e.g. CB350">
+        </div>
+        <div class="form-group">
+          <label for="segment">Segment</label>
+          <select id="segment" name="segment" required>
+            {% for s in options.segments %}
+            <option value="{{ s }}">{{ s | capitalize }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="year">Year</label>
+          <input type="number" id="year" name="year" value="2024" min="2015" max="2026" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Performance &amp; Specs</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cc">Engine CC</label>
+          <input type="number" id="cc" name="cc" value="200" min="50" max="2000" required>
+        </div>
+        <div class="form-group">
+          <label for="top_speed_kmh">Top Speed (km/h)</label>
+          <input type="number" id="top_speed_kmh" name="top_speed_kmh" value="130" min="60" max="350" required>
+        </div>
+        <div class="form-group">
+          <label for="mileage_kmpl">Mileage (km/l)</label>
+          <input type="number" id="mileage_kmpl" name="mileage_kmpl" value="40" min="10" max="100" step="0.1" required>
+        </div>
+        <div class="form-group">
+          <label for="fuel_tank_liters">Fuel Tank (L)</label>
+          <input type="number" id="fuel_tank_liters" name="fuel_tank_liters" value="12" min="5" max="25" step="0.1" required>
+        </div>
+        <div class="form-group">
+          <label for="speedometer_type">Speedometer</label>
+          <select id="speedometer_type" name="speedometer_type" required>
+            {% for t in options.speedometer_types %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="overall_score">Overall Score (0–100)</label>
+          <input type="number" id="overall_score" name="overall_score" value="70" min="0" max="100" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Pricing</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="factory_price_inr">Factory Price (₹)</label>
+          <input type="number" id="factory_price_inr" name="factory_price_inr" value="120000" min="30000" step="1000" required>
+        </div>
+        <div class="form-group">
+          <label for="gst_rate_pct">GST Rate (%)</label>
+          <select id="gst_rate_pct" name="gst_rate_pct" required>
+            {% for g in options.gst_rates %}
+            <option value="{{ g }}">{{ g }}%</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="gst_amount_inr">GST Amount (₹) <span class="optional">auto</span></label>
+          <input type="number" id="gst_amount_inr" name="gst_amount_inr" placeholder="Auto-calculated" min="0" step="100">
+          <span class="field-hint">Leave blank to auto-calculate from factory price</span>
+        </div>
+        <div class="form-group">
+          <label for="ex_showroom_inr">Ex-Showroom (₹) <span class="optional">auto</span></label>
+          <input type="number" id="ex_showroom_inr" name="ex_showroom_inr" placeholder="Auto-calculated" min="0" step="1000">
+        </div>
+        <div class="form-group">
+          <label for="on_road_price_inr">On-Road Price (₹)</label>
+          <input type="number" id="on_road_price_inr" name="on_road_price_inr" value="150000" min="40000" step="1000" required>
+        </div>
+        <div class="form-group">
+          <label for="price_increase_scenario_pct">Price Increase Scenario (%)</label>
+          <input type="number" id="price_increase_scenario_pct" name="price_increase_scenario_pct" value="5" min="0" max="30" step="0.1" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Buyer Profile</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="buyer_behaviour">Buyer Behaviour</label>
+          <select id="buyer_behaviour" name="buyer_behaviour" required>
+            {% for b in options.buyer_behaviours %}
+            <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="price_sensitivity">Price Sensitivity <span class="optional">optional</span></label>
+          <select id="price_sensitivity" name="price_sensitivity">
+            <option value="">Auto-predict with ML</option>
+            {% for s in sens_order %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+          <span class="field-hint">Leave blank to let the model predict after saving</span>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+      Add to Dataset &amp; Compare
+    </button>
+  </form>
+
+  <div id="results-area" class="hidden">
+    <div class="panel success-panel" id="success-msg"></div>
+
+    <div class="panel">
+      <h2>ML Prediction</h2>
+      <div id="prediction-result"></div>
+    </div>
+
+    <div class="panel">
+      <h2>How It Compares</h2>
+      <div id="comparison-grid" class="comparison-grid"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Similar Bikes in Dataset</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Model</th>
+              <th>CC</th>
+              <th>Mileage</th>
+              <th>Price</th>
+              <th>Score</th>
+              <th>Match</th>
+              <th>Sensitivity</th>
+            </tr>
+          </thead>
+          <tbody id="similar-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="error-panel" class="panel error-panel hidden">
+    <p id="error-message"></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const SENS_COLORS = {{ sens_colors | tojson }};
+
+  function fmt(n) {
+    return Number(n).toLocaleString('en-IN');
+  }
+
+  document.getElementById('add-bike-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving & comparing...';
+
+    const raw = Object.fromEntries(new FormData(e.target));
+    const data = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (v !== '') data[k] = v;
+    }
+
+    try {
+      const res = await fetch('/api/bikes/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      document.getElementById('error-panel').classList.add('hidden');
+
+      if (!res.ok) throw new Error(json.error || 'Failed to add bike');
+
+      document.getElementById('results-area').classList.remove('hidden');
+      document.getElementById('success-msg').textContent = json.message;
+
+      const pred = json.prediction.prediction;
+      const probs = json.prediction.probabilities;
+      document.getElementById('prediction-result').innerHTML = `
+        <div class="prediction-badge" style="background:${SENS_COLORS[pred] || '#3B82F6'}">${pred}</div>
+        <p class="model-used">Predicted by <span>${json.prediction.model}</span></p>
+        <div class="prob-bars">${Object.entries(probs).sort((a,b)=>b[1]-a[1]).map(([l,p]) => `
+          <div class="prob-row">
+            <span class="prob-label" style="color:${SENS_COLORS[l]}">${l}</span>
+            <div class="prob-track"><div class="prob-fill" style="width:${(p*100).toFixed(1)}%;background:${SENS_COLORS[l]}"></div></div>
+            <span class="prob-pct">${(p*100).toFixed(1)}%</span>
+          </div>
+        `).join('')}</div>
+      `;
+
+      const cmp = json.comparison;
+      const labels = {
+        price_inr: 'On-Road Price',
+        mileage_kmpl: 'Mileage',
+        cc: 'Engine CC',
+        overall_score: 'Overall Score',
+      };
+      document.getElementById('comparison-grid').innerHTML = Object.entries(cmp).map(([key, d]) => {
+        const val = key === 'price_inr' ? '₹' + fmt(d.value) : d.value + (key === 'mileage_kmpl' ? ' km/l' : key === 'cc' ? ' cc' : '');
+        const avg = key === 'price_inr' ? '₹' + fmt(d.dataset_avg) : d.dataset_avg;
+        return `
+          <div class="compare-card">
+            <span class="compare-label">${labels[key]}</span>
+            <span class="compare-value">${val}</span>
+            <div class="compare-bar"><div class="compare-fill" style="width:${d.percentile}%"></div></div>
+            <span class="compare-meta">${d.percentile}th percentile · avg ${avg}</span>
+          </div>
+        `;
+      }).join('');
+
+      const seg = json.segment;
+      document.getElementById('comparison-grid').innerHTML += `
+        <div class="compare-card compare-card-wide">
+          <span class="compare-label">Segment: ${seg.name}</span>
+          <span class="compare-meta">${seg.count_in_dataset} bikes in segment · avg price ₹${fmt(seg.avg_price_inr || 0)}</span>
+        </div>
+      `;
+
+      document.getElementById('similar-body').innerHTML = json.similar_bikes.map(b => `
+        <tr>
+          <td>${b.brand}</td>
+          <td><strong>${b.model}</strong></td>
+          <td>${b.cc}</td>
+          <td>${b.mileage_kmpl} km/l</td>
+          <td>₹${fmt(b.on_road_price_inr)}</td>
+          <td>${b.overall_score}</td>
+          <td><span class="match-pill">${b.similarity_pct}%</span></td>
+          <td><span class="sens-tag" style="background:${SENS_COLORS[b.price_sensitivity] || '#999'}">${b.price_sensitivity}</span></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('results-area').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+      document.getElementById('results-area').classList.add('hidden');
+      document.getElementById('error-panel').classList.remove('hidden');
+      document.getElementById('error-message').textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Add to Dataset & Compare';
+    }
+  });
+
+  // Auto-calc GST preview
+  function updateGstPreview() {
+    const factory = parseFloat(document.getElementById('factory_price_inr').value) || 0;
+    const gstRate = parseFloat(document.getElementById('gst_rate_pct').value) || 0;
+    const gstEl = document.getElementById('gst_amount_inr');
+    const exEl = document.getElementById('ex_showroom_inr');
+    if (!gstEl.value && factory > 0) {
+      const gst = Math.round(factory * gstRate / 100);
+      gstEl.placeholder = 'Auto: ₹' + gst.toLocaleString('en-IN');
+      exEl.placeholder = 'Auto: ₹' + (factory + gst).toLocaleString('en-IN');
+    }
+  }
+  ['factory_price_inr', 'gst_rate_pct'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateGstPreview);
+  });
+  updateGstPreview();
+</script>
+{% endblock %}

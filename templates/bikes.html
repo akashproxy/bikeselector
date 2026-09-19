@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Browse Bikes{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <span class="hero-kicker">Explore</span>
+  <h1>Browse Bikes</h1>
+  <p>Search and filter {{ total }} bikes from our dataset by brand, segment, and more.</p>
+</section>
+
+<div class="filters panel">
+  <div class="filter-row">
+    <input type="search" id="search" placeholder="Search brand or model..." class="search-input">
+    <select id="filter-brand">
+      <option value="">All brands</option>
+    </select>
+    <select id="filter-segment">
+      <option value="">All segments</option>
+      <option value="budget">Budget</option>
+      <option value="mid">Mid</option>
+      <option value="premium">Premium</option>
+    </select>
+    <select id="filter-sensitivity">
+      <option value="">All sensitivity</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+      <option value="Very High">Very High</option>
+    </select>
+    <button type="button" id="apply-filters" class="btn btn-primary">Apply</button>
+  </div>
+</div>
+
+<div class="table-wrap panel">
+  <table class="data-table" id="bikes-table">
+    <thead>
+      <tr>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>CC</th>
+        <th>Segment</th>
+        <th>On-Road Price</th>
+        <th>Score</th>
+        <th>Sensitivity</th>
+      </tr>
+    </thead>
+    <tbody id="bikes-body">
+      {% for bike in bikes %}
+      <tr>
+        <td>{{ bike.brand }}</td>
+        <td>{{ bike.model }}</td>
+        <td>{{ bike.cc }}</td>
+        <td><span class="tag tag-{{ bike.segment }}">{{ bike.segment }}</span></td>
+        <td>₹{{ "{:,}".format(bike.on_road_price_inr | int) }}</td>
+        <td>{{ bike.overall_score }}</td>
+        <td><span class="sens-tag" style="background:{{ sens_colors.get(bike.price_sensitivity, '#999') }}">{{ bike.price_sensitivity }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="table-meta" id="table-meta">Showing first 100 of {{ total }} bikes. Use filters to search.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const SENS_COLORS = {{ sens_colors | tojson }};
+
+  async function loadBikes() {
+    const params = new URLSearchParams({
+      q: document.getElementById('search').value,
+      brand: document.getElementById('filter-brand').value,
+      segment: document.getElementById('filter-segment').value,
+      sensitivity: document.getElementById('filter-sensitivity').value,
+      limit: 100,
+    });
+
+    const res = await fetch('/api/bikes?' + params);
+    const data = await res.json();
+    const tbody = document.getElementById('bikes-body');
+    tbody.innerHTML = data.bikes.map(b => `
+      <tr>
+        <td>${b.brand}</td>
+        <td>${b.model}</td>
+        <td>${b.cc}</td>
+        <td><span class="tag tag-${b.segment}">${b.segment}</span></td>
+        <td>₹${b.on_road_price_inr.toLocaleString('en-IN')}</td>
+        <td>${b.overall_score}</td>
+        <td><span class="sens-tag" style="background:${SENS_COLORS[b.price_sensitivity] || '#999'}">${b.price_sensitivity}</span></td>
+      </tr>
+    `).join('');
+    document.getElementById('table-meta').textContent =
+      `Showing ${data.bikes.length} of ${data.total} bikes`;
+  }
+
+  document.getElementById('apply-filters').addEventListener('click', loadBikes);
+  document.getElementById('search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadBikes();
+  });
+
+  const brands = {{ brands | tojson }};
+  const brandSel = document.getElementById('filter-brand');
+  brands.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b;
+    opt.textContent = b;
+    brandSel.appendChild(opt);
+  });
+</script>
+{% endblock %}

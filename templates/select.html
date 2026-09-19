@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Find Bike{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <span class="hero-kicker">Bike Finder</span>
+  <h1>Find Your Bike</h1>
+  <p>Tell us your minimum mileage, engine size, and budget — we'll show you the top 10 best matches.</p>
+</section>
+
+<div class="select-layout">
+  <form id="select-form" class="panel form-panel">
+    <h2>Your Preferences</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="min_mileage">Minimum Mileage (km/l)</label>
+        <input type="number" id="min_mileage" name="min_mileage"
+               value="{{ defaults.min_mileage }}" min="10" max="{{ mileage_max | int }}" step="0.1" required>
+        <span class="field-hint">Only bikes at or above this mileage</span>
+      </div>
+
+      <div class="form-group">
+        <label for="min_cc">Minimum Engine CC</label>
+        <input type="number" id="min_cc" name="min_cc"
+               value="{{ defaults.min_cc }}" min="50" max="2000" required>
+        <span class="field-hint">Only bikes at or above this engine size</span>
+      </div>
+
+      <div class="form-group">
+        <label for="max_price">Maximum Price (₹)</label>
+        <input type="number" id="max_price" name="max_price"
+               value="{{ defaults.max_price }}" min="50000" max="{{ price_max }}" step="5000" required>
+        <span class="field-hint">On-road price must be within budget</span>
+      </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+      Find Top 10 Bikes
+    </button>
+  </form>
+
+  <div id="results-section" class="hidden">
+    <div class="panel">
+      <div class="results-header">
+        <h2>Top Matches</h2>
+        <p id="results-summary" class="results-summary"></p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="results-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Brand</th>
+              <th>Model</th>
+              <th>CC</th>
+              <th>Mileage</th>
+              <th>Price</th>
+              <th>Score</th>
+              <th>Match</th>
+              <th>Sensitivity</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="empty-panel" class="panel empty-panel hidden">
+    <p>No bikes match your criteria. Try relaxing mileage, increasing budget, or widening CC tolerance.</p>
+  </div>
+
+  <div id="error-panel" class="panel error-panel hidden">
+    <p id="error-message"></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const SENS_COLORS = {{ sens_colors | tojson }};
+
+  document.getElementById('select-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+
+    const data = Object.fromEntries(new FormData(e.target));
+
+    try {
+      const res = await fetch('/api/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+
+      document.getElementById('error-panel').classList.add('hidden');
+
+      if (!res.ok) throw new Error(json.error || 'Search failed');
+
+      if (json.count === 0) {
+        document.getElementById('results-section').classList.add('hidden');
+        document.getElementById('empty-panel').classList.remove('hidden');
+        return;
+      }
+
+      document.getElementById('empty-panel').classList.add('hidden');
+      document.getElementById('results-section').classList.remove('hidden');
+
+      const f = json.filters;
+      document.getElementById('results-summary').textContent =
+        `${json.count} model(s) found — min ${f.min_mileage} km/l, min ${f.min_cc} cc, max ₹${f.max_price.toLocaleString('en-IN')}`;
+
+      const tbody = document.getElementById('results-body');
+      tbody.innerHTML = json.bikes.map((b, i) => `
+        <tr>
+          <td class="rank-cell">${i + 1}</td>
+          <td>${b.brand}</td>
+          <td><strong>${b.model}</strong></td>
+          <td>${b.cc}</td>
+          <td>${b.mileage_kmpl} km/l</td>
+          <td>₹${b.on_road_price_inr.toLocaleString('en-IN')}</td>
+          <td>${b.overall_score}</td>
+          <td><span class="match-pill">${(b.match_score * 100).toFixed(0)}%</span></td>
+          <td><span class="sens-tag" style="background:${SENS_COLORS[b.price_sensitivity] || '#999'}">${b.price_sensitivity}</span></td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('empty-panel').classList.add('hidden');
+      document.getElementById('error-panel').classList.remove('hidden');
+      document.getElementById('error-message').textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find Top 10 Bikes';
+    }
+  });
+</script>
+{% endblock %}
